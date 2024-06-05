@@ -1,5 +1,8 @@
 from rest_framework import viewsets, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import permission_classes, api_view
+from rest_framework.permissions import IsAuthenticated
+
 from .models import Tournament, Team, Fixture
 from .serializers import TournamentSerializer, TeamSerializer, FixtureSerializer
 from rest_framework.views import APIView
@@ -16,13 +19,25 @@ class TournamentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_team(request):
+    if request.method == 'POST':
+        # Extract data from request body
+        data = request.data
+        # Add registered_by field to the data with the current user
+        data['registered_by'] = request.user.id
+        # Serialize the data
+        serializer = TeamSerializer(data=data)
+        if serializer.is_valid():
+            # Save the team to the database
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
     permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(registered_by=self.request.user)
 
 
 class FixtureViewSet(viewsets.ModelViewSet):
