@@ -26,7 +26,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from api.views import (
     TournamentViewSet, TeamViewSet, FixtureViewSet,
-    CustomAuthToken, RegisterView, LogoutView, create_team
+    CustomAuthToken, RegisterView, LogoutView, create_team, update_team, delete_team, create_tournament
 )
 
 router = DefaultRouter()
@@ -40,5 +40,8 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),  # Registration endpoint
     path('logout/', LogoutView.as_view(), name='logout'),  # Logout endpoint
     path('create-team/', create_team, name='create_team'),
+    path('teams/<int:pk>/', update_team, name='update_team'),
+    path('teams/<int:pk>/', delete_team, name='delete_team'),
+    path('tournaments/', create_tournament, name='create_tournament'),
     path('', include(router.urls)),
 ]

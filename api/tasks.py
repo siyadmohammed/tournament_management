@@ -11,7 +11,7 @@ def send_fixture_notification():
             send_mail(
                 'Upcoming Match Notification',
                 f'Dear {team.name}, you have a match on {fixture.date} at {fixture.time}.',
-                'from@example.com',
+                'siyad.ma.mohammed2001@gmail.com',
                 [team.contact_email],
                 fail_silently=False,
             )

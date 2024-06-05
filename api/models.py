@@ -44,3 +44,17 @@ class Fixture(models.Model):
 
     def __str__(self):
         return f"{self.tournament.name} - {self.date} - {self.time}"
+
+
+class Match(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    team1 = models.ForeignKey('Team', related_name='team1_matches', on_delete=models.CASCADE)
+    team2 = models.ForeignKey('Team', related_name='team2_matches', on_delete=models.CASCADE)
+    date_time = models.DateTimeField()
+    location = models.CharField(max_length=100)
+    status = models.CharField(max_length=50, default='Scheduled')
+
+    # Additional fields and methods as needed
+
+    def __str__(self):
+        return f"{self.team1} vs {self.team2} ({self.tournament})"

@@ -2,8 +2,10 @@ from rest_framework import viewsets, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
+from itertools import combinations
 
-from .models import Tournament, Team, Fixture
+from . import models
+from .models import Tournament, Team, Fixture, Match
 from .serializers import TournamentSerializer, TeamSerializer, FixtureSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -34,6 +36,60 @@ def create_team(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def update_team(request, pk):
+    try:
+        team = Team.objects.get(pk=pk)
+    except Team.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        serializer = TeamSerializer(team, data=request.data)
+    elif request.method == 'PATCH':
+        serializer = TeamSerializer(team, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_team(request, pk):
+    try:
+        team = Team.objects.get(pk=pk)
+    except Team.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    team.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_tournament(request):
+    serializer = TournamentSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from itertools import combinations
+
+class Tournament(models.Model):
+    # Your existing Tournament model fields
+
+    def generate_fixtures(self):
+        teams = self.teams.all()
+        matches = []
+        for team1, team2 in combinations(teams, 2):
+            # Create a match between each pair of teams
+            match = Match.objects.create(tournament=self, team1=team1, team2=team2)
+            matches.append(match)
+        return matches
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
