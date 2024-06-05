@@ -1,3 +1,5 @@
+from itertools import combinations
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
@@ -33,7 +35,16 @@ class Team(models.Model):
     def __str__(self):
         return self.name
 
+class Tournament(models.Model):
 
+    def generate_fixtures(self):
+        teams = self.teams.all()
+        matches = []
+        for team1, team2 in combinations(teams, 2):
+            # Create a match between each pair of teams
+            match = Match.objects.create(tournament=self, team1=team1, team2=team2)
+            matches.append(match)
+        return matches
 class Fixture(models.Model):
     teams = models.ManyToManyField(Team)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)

@@ -79,17 +79,7 @@ def create_tournament(request):
 
 from itertools import combinations
 
-class Tournament(models.Model):
-    # Your existing Tournament model fields
 
-    def generate_fixtures(self):
-        teams = self.teams.all()
-        matches = []
-        for team1, team2 in combinations(teams, 2):
-            # Create a match between each pair of teams
-            match = Match.objects.create(tournament=self, team1=team1, team2=team2)
-            matches.append(match)
-        return matches
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
