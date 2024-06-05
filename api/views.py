@@ -21,6 +21,9 @@ class TeamViewSet(viewsets.ModelViewSet):
     serializer_class = TeamSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(registered_by=self.request.user)
+
 
 class FixtureViewSet(viewsets.ModelViewSet):
     queryset = Fixture.objects.all()
@@ -39,8 +42,9 @@ class RegisterView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+        email = request.data.get('email')
         User = get_user_model()
-        user = User.objects.create_user(username=username, password=password)
+        user = User.objects.create_user(username=username, password=password, email=email)
         token, _ = Token.objects.get_or_create(user=user)
         return Response({'token': token.key}, status=status.HTTP_201_CREATED)
 
